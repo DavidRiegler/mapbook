@@ -98,7 +98,13 @@ export function MemoryDialog({
       <DialogContent className="max-w-md bg-card text-card-foreground">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <span className="text-2xl">{country.flag}</span>
+            <Image
+              src={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png`}
+              alt={country.name}
+              className="h-6 w-8 object-cover rounded-sm"
+              width={40}
+              height={30}
+            />
             {country.name}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
@@ -123,7 +129,7 @@ export function MemoryDialog({
               placeholder="Write about your experience, what you did, what you liked..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="min-h-[100px] resize-none bg-secondary"
+              className="min-h-25 resize-none bg-secondary"
             />
           </Field>
 

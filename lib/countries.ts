@@ -90,6 +90,7 @@ export const countries: Country[] = [
   { code: 'KZ', name: 'Kazakhstan', flag: '🇰🇿' },
   { code: 'KE', name: 'Kenya', flag: '🇰🇪' },
   { code: 'KI', name: 'Kiribati', flag: '🇰🇮' },
+  { code: 'KO', name: 'Kosovo', flag: '🇽🇰' },
   { code: 'KP', name: 'North Korea', flag: '🇰🇵' },
   { code: 'KR', name: 'South Korea', flag: '🇰🇷' },
   { code: 'KW', name: 'Kuwait', flag: '🇰🇼' },

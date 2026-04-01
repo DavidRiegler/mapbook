@@ -5,6 +5,7 @@ import { getCountryByCode } from '@/lib/countries'
 import type { Memory } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import Image from 'next/image'
 
 interface VisitedCountriesListProps {
   memories: Memory[]
@@ -51,7 +52,13 @@ export function VisitedCountriesList({
                 key={item.id}
                 className="group flex items-start gap-3 rounded-lg border border-border bg-secondary/50 p-3 transition-colors hover:bg-secondary"
               >
-                <span className="text-2xl">{item.country?.flag}</span>
+                <Image
+                  src={`https://flagcdn.com/w40/${item.country?.code.toLowerCase()}.png`}
+                  alt={item.country?.name || item.countryName}
+                  width={40}
+                  height={30}
+                  className="h-6 w-8 object-cover rounded-sm"
+                />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-foreground">{item.country?.name || item.countryName}</p>
                   {item.description && (
@@ -62,7 +69,7 @@ export function VisitedCountriesList({
                   {item.images.length > 0 && (
                     <div className="mt-2 flex gap-1">
                       {item.images.slice(0, 3).map((img, i) => (
-                        <img
+                        <Image
                           key={i}
                           src={img}
                           alt=""

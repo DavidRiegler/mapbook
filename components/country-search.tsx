@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { countries, searchCountries } from '@/lib/countries'
 import type { Country } from '@/lib/types'
+import Image from 'next/image'
 
 interface CountrySearchProps {
   onSelectCountry: (country: Country) => void
@@ -74,7 +75,13 @@ export function CountrySearch({ onSelectCountry, visitedCountries }: CountrySear
                   onClick={() => handleSelect(country)}
                   className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm transition-colors hover:bg-accent"
                 >
-                  <span className="text-lg">{country.flag}</span>
+                  <Image
+                    src={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png`}
+                    alt={country.name}
+                    className="h-6 w-8 object-cover rounded-sm"
+                    width={40}
+                    height={30}
+                  />
                   <span className="flex-1 text-foreground">{country.name}</span>
                   {visitedCountries.includes(country.code) && (
                     <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs text-primary">
