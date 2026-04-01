@@ -38,7 +38,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
             <Globe className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-lg font-semibold text-foreground">TravelMap</span>
+          <span className="text-lg font-semibold text-foreground">Mapbook</span>
         </div>
 
         {/* Tabs */}
