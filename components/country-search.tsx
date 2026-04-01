@@ -76,7 +76,7 @@ export function CountrySearch({ onSelectCountry, visitedCountries }: CountrySear
                   className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm transition-colors hover:bg-accent"
                 >
                   <Image
-                    src={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png`}
+                    src={`/country-flags/${country.code.toLowerCase()}.svg`}
                     alt={country.name}
                     className="h-6 w-8 object-cover rounded-sm"
                     width={40}

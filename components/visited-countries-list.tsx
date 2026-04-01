@@ -53,7 +53,7 @@ export function VisitedCountriesList({
                 className="group flex items-start gap-3 rounded-lg border border-border bg-secondary/50 p-3 transition-colors hover:bg-secondary"
               >
                 <Image
-                  src={`https://flagcdn.com/w40/${item.country?.code.toLowerCase()}.png`}
+                  src={`/country-flags/${item.country?.code.toLowerCase()}.svg`}
                   alt={item.country?.name || item.countryName}
                   width={40}
                   height={30}
@@ -74,6 +74,8 @@ export function VisitedCountriesList({
                           src={img}
                           alt=""
                           className="h-8 w-8 rounded-sm object-cover"
+                          width={40}
+                          height={30}
                         />
                       ))}
                       {item.images.length > 3 && (
