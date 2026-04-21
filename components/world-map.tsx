@@ -5,11 +5,11 @@ import { getCountryByCode } from '@/lib/countries'
 
 // Map from topojson IDs to ISO Alpha-2 codes
 const countryIdToCode: Record<string, string> = {
-  '4': 'AF', '8': 'AL', '12': 'DZ', '20': 'AD', '24': 'AO', '28': 'AG',
-  '32': 'AR', '51': 'AM', '36': 'AU', '40': 'AT', '31': 'AZ', '44': 'BS',
-  '48': 'BH', '50': 'BD', '52': 'BB', '112': 'BY', '56': 'BE', '84': 'BZ',
-  '204': 'BJ', '64': 'BT', '68': 'BO', '70': 'BA', '72': 'BW', '76': 'BR',
-  '96': 'BN', '100': 'BG', '854': 'BF', '108': 'BI', '132': 'CV', '116': 'KH',
+  '004': 'AF', '008': 'AL', '012': 'DZ', '020': 'AD', '024': 'AO', '028': 'AG',
+  '032': 'AR', '051': 'AM', '036': 'AU', '040': 'AT', '031': 'AZ', '044': 'BS',
+  '048': 'BH', '050': 'BD', '052': 'BB', '112': 'BY', '056': 'BE', '084': 'BZ',
+  '204': 'BJ', '064': 'BT', '068': 'BO', '070': 'BA', '072': 'BW', '076': 'BR',
+  '096': 'BN', '100': 'BG', '854': 'BF', '108': 'BI', '132': 'CV', '116': 'KH',
   '120': 'CM', '124': 'CA', '140': 'CF', '148': 'TD', '152': 'CL', '156': 'CN',
   '170': 'CO', '174': 'KM', '178': 'CG', '180': 'CD', '188': 'CR', '384': 'CI',
   '191': 'HR', '192': 'CU', '196': 'CY', '203': 'CZ', '208': 'DK', '262': 'DJ',
@@ -234,8 +234,13 @@ export function WorldMap({ visitedCountries, onCountryClick }: WorldMapProps) {
     setTooltipContent('')
   }, [])
 
-  const handleCountryClick = useCallback((feature: GeoFeature) => {
+  const handleCountryClick = useCallback((feature: GeoFeature) => {    
+    console.log(feature.id);
+    
     const countryCode = countryIdToCode[feature.id]
+    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHH");
+    console.log(countryCode);
+    
     if (countryCode) {
       onCountryClick(countryCode)
     }
