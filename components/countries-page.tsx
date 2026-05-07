@@ -25,14 +25,20 @@ export function CountriesPage({
   const [editingMemory, setEditingMemory] = useState<Memory | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  const visitedCountries = memories.map((m) => m.countryCode)
+  const visitedCountries = [...new Set(memories.map((m) => m.countryCode))]
+
+  // Derived live from memories — never stale regardless of mutations
+  const dialogPreviousVisits = selectedCountry
+    ? memories.filter(
+        (m) => m.countryCode === selectedCountry.code && m.id !== editingMemory?.id
+      )
+    : []
 
   const handleCountrySelect = useCallback((country: Country) => {
     setSelectedCountry(country)
-    const existing = memories.find((m) => m.countryCode === country.code)
-    setEditingMemory(existing || null)
+    setEditingMemory(null)
     setDialogOpen(true)
-  }, [memories])
+  }, [])
 
   const handleCountryClick = useCallback((countryCode: string) => {
     const country = getCountryByCode(countryCode)
@@ -46,6 +52,10 @@ export function CountriesPage({
     setSelectedCountry(country || null)
     setEditingMemory(memory)
     setDialogOpen(true)
+  }, [])
+
+  const handleEditVisitInDialog = useCallback((memory: Memory) => {
+    setEditingMemory(memory)
   }, [])
 
   const handleSave = useCallback((data: { description: string; images: string[] }) => {
@@ -111,9 +121,12 @@ export function CountriesPage({
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         country={selectedCountry}
-        existingMemory={editingMemory}
+        editingMemory={editingMemory}
+        previousVisits={dialogPreviousVisits}
         onSave={handleSave}
         onDelete={editingMemory ? handleDelete : undefined}
+        onEditVisit={handleEditVisitInDialog}
+        onDeleteVisit={onDeleteMemory}
       />
     </div>
   )

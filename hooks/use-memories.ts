@@ -24,12 +24,19 @@ function loadMemories(): Memory[] {
 }
 
 export function useMemories() {
-  const [memories, setMemories] = useState<Memory[]>(() => loadMemories())
-  const [isLoaded] = useState(true)
+  const [memories, setMemories] = useState<Memory[]>([])
+  const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(memories))
-  }, [memories])
+    setMemories(loadMemories())
+    setIsLoaded(true)
+  }, [])
+
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(memories))
+    }
+  }, [memories, isLoaded])
 
   const addMemory = useCallback((memory: Omit<Memory, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newMemory: Memory = {
@@ -59,8 +66,12 @@ export function useMemories() {
     return memories.find(m => m.countryCode === countryCode)
   }, [memories])
 
+  const getMemoriesByCountry = useCallback((countryCode: string) => {
+    return memories.filter(m => m.countryCode === countryCode)
+  }, [memories])
+
   const getVisitedCountries = useCallback(() => {
-    return memories.map(m => m.countryCode)
+    return [...new Set(memories.map(m => m.countryCode))]
   }, [memories])
 
   return {
@@ -70,6 +81,7 @@ export function useMemories() {
     updateMemory,
     deleteMemory,
     getMemoryByCountry,
+    getMemoriesByCountry,
     getVisitedCountries,
   }
 }

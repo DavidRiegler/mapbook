@@ -23,6 +23,8 @@ export function VisitedCountriesList({
     country: getCountryByCode(m.countryCode),
   }))
 
+  const uniqueCountriesCount = new Set(memories.map(m => m.countryCode)).size
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -30,7 +32,7 @@ export function VisitedCountriesList({
           Visited Countries
         </h2>
         <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
-          {memories.length}
+          {uniqueCountriesCount}
         </span>
       </div>
 
@@ -86,7 +88,7 @@ export function VisitedCountriesList({
                     </div>
                   )}
                 </div>
-                <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="flex gap-1">
                   <Button
                     variant="ghost"
                     size="icon"
