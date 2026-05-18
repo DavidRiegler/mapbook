@@ -22,6 +22,11 @@ export function VisitedCountriesList({
     ...m,
     country: getCountryByCode(m.countryCode),
   }))
+      .sort((a, b) => {
+        const dateA = new Date(a.visitDate ?? a.createdAt).getTime()
+        const dateB = new Date(b.visitDate ?? b.createdAt).getTime()
+        return dateB - dateA
+      })
 
   const uniqueCountriesCount = new Set(memories.map(m => m.countryCode)).size
 
