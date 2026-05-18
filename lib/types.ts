@@ -4,6 +4,7 @@ export interface Memory {
   countryName: string
   description: string
   images: string[]
+  visitDate: string
   createdAt: string
   updatedAt: string
 }

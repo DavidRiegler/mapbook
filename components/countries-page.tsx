@@ -58,13 +58,14 @@ export function CountriesPage({
     setEditingMemory(memory)
   }, [])
 
-  const handleSave = useCallback((data: { description: string; images: string[] }) => {
+  const handleSave = useCallback((data: { description: string; images: string[]; visitDate: string }) => {
     if (!selectedCountry) return
 
     if (editingMemory) {
       onUpdateMemory(editingMemory.id, {
         description: data.description,
         images: data.images,
+        visitDate: data.visitDate,
       })
     } else {
       onAddMemory({
@@ -72,6 +73,7 @@ export function CountriesPage({
         countryName: selectedCountry.name,
         description: data.description,
         images: data.images,
+        visitDate: data.visitDate,
       })
     }
 

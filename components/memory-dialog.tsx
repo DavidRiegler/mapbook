@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { FieldGroup, Field, FieldLabel } from '@/components/ui/field'
 import type { Country, Memory } from '@/lib/types'
@@ -22,7 +23,7 @@ interface MemoryDialogProps {
   country: Country | null
   editingMemory?: Memory | null
   previousVisits?: Memory[]
-  onSave: (data: { description: string; images: string[] }) => void
+  onSave: (data: { description: string; images: string[]; visitDate: string }) => void
   onDelete?: () => void
   onEditVisit?: (memory: Memory) => void
   onDeleteVisit?: (id: string) => void
@@ -32,7 +33,7 @@ interface MemoryFormProps {
   country: Country
   editingMemory: Memory | null | undefined
   previousVisits: Memory[]
-  onSave: (data: { description: string; images: string[] }) => void
+  onSave: (data: { description: string; images: string[]; visitDate: string }) => void
   onDelete?: () => void
   onOpenChange: (open: boolean) => void
   onEditVisit?: (memory: Memory) => void
@@ -41,12 +42,19 @@ interface MemoryFormProps {
 
 const MAX_IMAGES = 5
 
+function isoToDisplay(iso: string): string {
+  const [y, m, d] = iso.slice(0, 10).split('-')
+  return `${d}/${m}/${y}`
+}
+
+function displayToIso(display: string): string {
+  const parts = display.split('/')
+  if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`
+  return display
+}
+
 function formatDate(isoString: string): string {
-  return new Date(isoString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
+  return isoToDisplay(isoString)
 }
 
 function MemoryForm({
@@ -61,6 +69,11 @@ function MemoryForm({
 }: MemoryFormProps) {
   const [description, setDescription] = useState(editingMemory?.description ?? '')
   const [images, setImages] = useState<string[]>(editingMemory?.images ?? [])
+  const [visitDate, setVisitDate] = useState(
+    editingMemory?.visitDate
+      ? isoToDisplay(editingMemory.visitDate)
+      : isoToDisplay(new Date().toISOString().slice(0, 10))
+  )
   const [showUpgradeHint, setShowUpgradeHint] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -98,7 +111,7 @@ function MemoryForm({
   }
 
   const handleSave = () => {
-    onSave({ description, images })
+    onSave({ description, images, visitDate: displayToIso(visitDate) })
     onOpenChange(false)
   }
 
@@ -136,6 +149,17 @@ function MemoryForm({
                   Visited
                 </div>
               </div>
+            </Field>
+
+            <Field>
+              <FieldLabel>Visit Date</FieldLabel>
+              <Input
+                type="text"
+                placeholder="DD/MM/YYYY"
+                value={visitDate}
+                onChange={(e) => setVisitDate(e.target.value)}
+                className="bg-secondary"
+              />
             </Field>
 
             <Field>
@@ -246,7 +270,7 @@ function MemoryForm({
                       <div className="flex-1 min-w-0">
                         <div className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
                           <Calendar className="h-3 w-3" />
-                          {formatDate(visit.createdAt)}
+                          {formatDate(visit.visitDate ?? visit.createdAt)}
                         </div>
                         {visit.description && (
                           <p className="line-clamp-2 text-xs text-foreground">

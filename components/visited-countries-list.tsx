@@ -1,6 +1,6 @@
 'use client'
 
-import { MapPin, Edit2, Trash2 } from 'lucide-react'
+import { MapPin, Edit2, Trash2, Calendar } from 'lucide-react'
 import { getCountryByCode } from '@/lib/countries'
 import type { Memory } from '@/lib/types'
 import { Button } from '@/components/ui/button'
@@ -63,6 +63,15 @@ export function VisitedCountriesList({
                 />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-foreground">{item.country?.name || item.countryName}</p>
+                  {(item.visitDate || item.createdAt) && (
+                    <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                      <Calendar className="h-3 w-3" />
+                      {(() => {
+                        const d = new Date(item.visitDate ?? item.createdAt)
+                        return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`
+                      })()}
+                    </div>
+                  )}
                   {item.description && (
                     <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
                       {item.description}
