@@ -58,7 +58,14 @@ export function CountriesPage({
     setEditingMemory(memory)
   }, [])
 
-  const handleSave = useCallback((data: { description: string; images: string[]; visitDate: string }) => {
+  const handleSave = useCallback((data: {
+    description: string;
+    images: string[];
+    visitDate: string;
+    rating: number;
+    mood: Memory['mood'];
+    weather: Memory['weather'];
+  }) => {
     if (!selectedCountry) return
 
     if (editingMemory) {
@@ -66,6 +73,9 @@ export function CountriesPage({
         description: data.description,
         images: data.images,
         visitDate: data.visitDate,
+        rating: data.rating,
+        mood: data.mood,
+        weather: data.weather
       })
     } else {
       onAddMemory({
@@ -74,6 +84,9 @@ export function CountriesPage({
         description: data.description,
         images: data.images,
         visitDate: data.visitDate,
+        rating: data.rating,
+        mood: data.mood,
+        weather: data.weather
       })
     }
 
@@ -81,6 +94,7 @@ export function CountriesPage({
     setSelectedCountry(null)
     setEditingMemory(null)
   }, [selectedCountry, editingMemory, onAddMemory, onUpdateMemory])
+
 
   const handleDelete = useCallback(() => {
     if (editingMemory) {

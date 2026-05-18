@@ -7,6 +7,9 @@ export interface Memory {
   visitDate: string
   createdAt: string
   updatedAt: string
+  rating: number
+  mood: 'stressed' | 'happy' | 'excited' | 'tired'
+  weather: 'sunny' | 'cloudy' | 'rainy' | 'windy' | 'snowy'
 }
 
 export interface Country {

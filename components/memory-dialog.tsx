@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import Image from 'next/image'
-import { ImagePlus, X, Crown, Check, Edit2, Trash2, Calendar } from 'lucide-react'
+import {ImagePlus, X, Crown, Check, Edit2, Trash2, Calendar, Sun, Cloud, CloudRain, Wind, Snowflake} from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { FieldGroup, Field, FieldLabel } from '@/components/ui/field'
 import type { Country, Memory } from '@/lib/types'
+import {cn} from "@/lib/utils";
 
 interface MemoryDialogProps {
   open: boolean
@@ -23,7 +24,14 @@ interface MemoryDialogProps {
   country: Country | null
   editingMemory?: Memory | null
   previousVisits?: Memory[]
-  onSave: (data: { description: string; images: string[]; visitDate: string }) => void
+  onSave: (data: {
+    description: string;
+    images: string[];
+    visitDate: string;
+    rating: number;
+    mood: Memory['mood'];
+    weather: Memory['weather'];
+  }) => void
   onDelete?: () => void
   onEditVisit?: (memory: Memory) => void
   onDeleteVisit?: (id: string) => void
@@ -33,7 +41,14 @@ interface MemoryFormProps {
   country: Country
   editingMemory: Memory | null | undefined
   previousVisits: Memory[]
-  onSave: (data: { description: string; images: string[]; visitDate: string }) => void
+  onSave: (data: {
+    description: string;
+    images: string[];
+    visitDate: string;
+    rating: number;
+    mood: "stressed" | "happy" | "excited" | "tired";
+    weather: "sunny" | "cloudy" | "rainy" | "windy" | "snowy"
+  }) => void
   onDelete?: () => void
   onOpenChange: (open: boolean) => void
   onEditVisit?: (memory: Memory) => void
@@ -74,6 +89,25 @@ function MemoryForm({
       ? isoToDisplay(editingMemory.visitDate)
       : isoToDisplay(new Date().toISOString().slice(0, 10))
   )
+  const [rating, setRating] = useState(editingMemory?.rating ?? 5)
+  const [mood, setMood] = useState(editingMemory?.mood ?? 'happy')
+  const [weather, setWeather] = useState(editingMemory?.weather ?? 'sunny')
+
+  const moods = [
+    { id: 'stressed', emoji: '😫', color: 'bg-orange-500/10 text-orange-600 border-orange-200' },
+    { id: 'happy', emoji: '😊', color: 'bg-green-500/10 text-green-600 border-green-200' },
+    { id: 'excited', emoji: '🤩', color: 'bg-yellow-500/10 text-yellow-600 border-yellow-200' },
+    { id: 'tired', emoji: '😴', color: 'bg-blue-500/10 text-blue-600 border-blue-200' },
+  ] as const
+
+  const weatherTypes = [
+    { id: 'sunny', icon: Sun },
+    { id: 'cloudy', icon: Cloud },
+    { id: 'rainy', icon: CloudRain },
+    { id: 'windy', icon: Wind },
+    { id: 'snowy', icon: Snowflake },
+  ] as const
+
   const [showUpgradeHint, setShowUpgradeHint] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -111,7 +145,14 @@ function MemoryForm({
   }
 
   const handleSave = () => {
-    onSave({ description, images, visitDate: displayToIso(visitDate) })
+    onSave({
+      description,
+      images,
+      visitDate: displayToIso(visitDate),
+      rating,
+      mood,
+      weather
+    })
     onOpenChange(false)
   }
 
@@ -141,15 +182,6 @@ function MemoryForm({
 
         <div className="flex-1 overflow-y-auto min-h-0">
           <FieldGroup className="gap-4">
-            <Field>
-              <div className="flex items-center justify-between">
-                <FieldLabel>Status</FieldLabel>
-                <div className="flex items-center gap-2 rounded-full bg-primary/20 px-3 py-1 text-sm text-primary">
-                  <Check className="h-4 w-4" />
-                  Visited
-                </div>
-              </div>
-            </Field>
 
             <Field>
               <FieldLabel>Visit Date</FieldLabel>
@@ -198,6 +230,7 @@ function MemoryForm({
                 onChange={handleImageUpload}
                 title="Upload photos"
                 aria-label="Upload photos"
+
               />
 
               {images.length > 0 ? (
@@ -253,6 +286,63 @@ function MemoryForm({
                 </div>
               )}
             </Field>
+
+            <Field>
+              <FieldLabel>Rating: <span className="text-primary font-bold">{rating}/10</span></FieldLabel>
+              <div className="flex h-10 items-center">
+                <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    step="1"
+                    value={rating}
+                    onChange={(e) => setRating(Number(e.target.value))}
+                    className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
+                />
+              </div>
+            </Field>
+
+            <Field>
+              <FieldLabel>How were you feeling?</FieldLabel>
+              <div className="flex gap-2">
+                {moods.map((m) => (
+                    <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => setMood(m.id)}
+                        className={cn(
+                            "flex flex-1 flex-col items-center gap-1 rounded-lg border p-2 transition-all",
+                            mood === m.id ? m.color + " border-current shadow-sm" : "bg-secondary/30 border-transparent text-muted-foreground hover:bg-secondary/50"
+                        )}
+                    >
+                      <span className="text-xl">{m.emoji}</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-tight">{m.id}</span>
+                    </button>
+                ))}
+              </div>
+            </Field>
+
+            <Field>
+              <FieldLabel>Weather & Temperature</FieldLabel>
+              <div className="flex flex-col gap-3">
+                <div className="flex justify-between bg-secondary/30 p-1 rounded-full border border-border/50">
+                  {weatherTypes.map((w) => (
+                      <button
+                          key={w.id}
+                          type="button"
+                          onClick={() => setWeather(w.id)}
+                          className={cn(
+                              "flex h-9 w-9 items-center justify-center rounded-full transition-all",
+                              weather === w.id ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground"
+                          )}
+                      >
+                        <w.icon className="h-4 w-4" />
+                      </button>
+                  ))}
+                </div>
+              </div>
+            </Field>
+
           </FieldGroup>
 
           {previousVisitsSectionTitle && (
