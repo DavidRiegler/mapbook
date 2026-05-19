@@ -291,6 +291,7 @@ function MemoryForm({
               <FieldLabel>Rating: <span className="text-primary font-bold">{rating}/10</span></FieldLabel>
               <div className="flex h-10 items-center">
                 <input
+                    title='rating'
                     type="range"
                     min="1"
                     max="10"
@@ -328,6 +329,7 @@ function MemoryForm({
                 <div className="flex justify-between bg-secondary/30 p-1 rounded-full border border-border/50">
                   {weatherTypes.map((w) => (
                       <button
+                          title={w.id}
                           key={w.id}
                           type="button"
                           onClick={() => setWeather(w.id)}

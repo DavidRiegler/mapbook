@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo, useEffect, useRef, type MouseEvent, type WheelEvent } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef, type MouseEvent } from 'react'
 import { getCountryByCode } from '@/lib/countries'
 
 // Map from topojson IDs to ISO Alpha-2 codes
@@ -118,6 +118,9 @@ export function WorldMap({ visitedCountries, onCountryClick }: WorldMapProps) {
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
   const svgRef = useRef<SVGSVGElement>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
+  const touchPanStartRef = useRef({ x: 0, y: 0 })
+  const touchDistanceRef = useRef<number | null>(null)
+  const isPanningRef = useRef(false)
 
   const visitedSet = useMemo(() => new Set(visitedCountries), [visitedCountries])
 
@@ -179,25 +182,6 @@ export function WorldMap({ visitedCountries, onCountryClick }: WorldMapProps) {
       })
   }, [])
 
-  const handleWheel = useCallback((e: WheelEvent) => {
-    e.preventDefault()
-    const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9
-    const svg = svgRef.current
-    if (!svg) return
-
-    const rect = svg.getBoundingClientRect()
-    const mouseX = ((e.clientX - rect.left) / rect.width) * viewBox.width + viewBox.x
-    const mouseY = ((e.clientY - rect.top) / rect.height) * viewBox.height + viewBox.y
-
-    const newWidth = Math.max(100, Math.min(1600, viewBox.width * zoomFactor))
-    const newHeight = Math.max(50, Math.min(800, viewBox.height * zoomFactor))
-
-    const newX = mouseX - ((mouseX - viewBox.x) / viewBox.width) * newWidth
-    const newY = mouseY - ((mouseY - viewBox.y) / viewBox.height) * newHeight
-
-    setViewBox({ x: newX, y: newY, width: newWidth, height: newHeight })
-  }, [viewBox])
-
   const handleMouseDown = useCallback((e: MouseEvent) => {
     if (e.button === 0) {
       setIsPanning(true)
@@ -234,13 +218,8 @@ export function WorldMap({ visitedCountries, onCountryClick }: WorldMapProps) {
     setTooltipContent('')
   }, [])
 
-  const handleCountryClick = useCallback((feature: GeoFeature) => {    
-    console.log(feature.id);
-    
+  const handleCountryClick = useCallback((feature: GeoFeature) => {
     const countryCode = countryIdToCode[feature.id]
-    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHH");
-    console.log(countryCode);
-    
     if (countryCode) {
       onCountryClick(countryCode)
     }
@@ -252,13 +231,105 @@ export function WorldMap({ visitedCountries, onCountryClick }: WorldMapProps) {
     tooltipRef.current.style.top = `${tooltipPosition.y - 30}px`
   }, [tooltipPosition])
 
+  useEffect(() => {
+    isPanningRef.current = isPanning
+  }, [isPanning])
+
+  useEffect(() => {
+    const svg = svgRef.current
+    if (!svg) return
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        isPanningRef.current = true
+        setIsPanning(true)
+        touchPanStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+        touchDistanceRef.current = null
+      } else if (e.touches.length === 2) {
+        isPanningRef.current = false
+        setIsPanning(false)
+        const dx = e.touches[0].clientX - e.touches[1].clientX
+        const dy = e.touches[0].clientY - e.touches[1].clientY
+        touchDistanceRef.current = Math.sqrt(dx * dx + dy * dy)
+      }
+    }
+
+    const onTouchMove = (e: TouchEvent) => {
+      e.preventDefault()
+      const rect = svg.getBoundingClientRect()
+
+      if (e.touches.length === 1 && isPanningRef.current) {
+        setViewBox((prev) => {
+          const dx = ((e.touches[0].clientX - touchPanStartRef.current.x) / rect.width) * prev.width
+          const dy = ((e.touches[0].clientY - touchPanStartRef.current.y) / rect.height) * prev.height
+          touchPanStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+          return { ...prev, x: prev.x - dx, y: prev.y - dy }
+        })
+      } else if (e.touches.length === 2 && touchDistanceRef.current !== null) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX
+        const dy = e.touches[0].clientY - e.touches[1].clientY
+        const distance = Math.sqrt(dx * dx + dy * dy)
+        const zoomFactor = touchDistanceRef.current / distance
+        const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2
+        const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2
+
+        setViewBox((prev) => {
+          const svgX = ((cx - rect.left) / rect.width) * prev.width + prev.x
+          const svgY = ((cy - rect.top) / rect.height) * prev.height + prev.y
+          const newWidth = Math.max(100, Math.min(1600, prev.width * zoomFactor))
+          const newHeight = Math.max(50, Math.min(800, prev.height * zoomFactor))
+          const newX = svgX - ((svgX - prev.x) / prev.width) * newWidth
+          const newY = svgY - ((svgY - prev.y) / prev.height) * newHeight
+          return { x: newX, y: newY, width: newWidth, height: newHeight }
+        })
+
+        touchDistanceRef.current = distance
+      }
+    }
+
+    const onTouchEnd = () => {
+      isPanningRef.current = false
+      setIsPanning(false)
+      touchDistanceRef.current = null
+    }
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      const rect = svg.getBoundingClientRect()
+      const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9
+      setViewBox((prev) => {
+        const mouseX = ((e.clientX - rect.left) / rect.width) * prev.width + prev.x
+        const mouseY = ((e.clientY - rect.top) / rect.height) * prev.height + prev.y
+        const newWidth = Math.max(100, Math.min(1600, prev.width * zoomFactor))
+        const newHeight = Math.max(50, Math.min(800, prev.height * zoomFactor))
+        return {
+          x: mouseX - ((mouseX - prev.x) / prev.width) * newWidth,
+          y: mouseY - ((mouseY - prev.y) / prev.height) * newHeight,
+          width: newWidth,
+          height: newHeight,
+        }
+      })
+    }
+
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('touchstart', onTouchStart, { passive: false })
+    svg.addEventListener('touchmove', onTouchMove, { passive: false })
+    svg.addEventListener('touchend', onTouchEnd)
+
+    return () => {
+      svg.removeEventListener('wheel', onWheel)
+      svg.removeEventListener('touchstart', onTouchStart)
+      svg.removeEventListener('touchmove', onTouchMove)
+      svg.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [])
+
   return (
     <div className="relative h-full w-full overflow-hidden rounded-lg bg-background">
       <svg
         ref={svgRef}
         viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
         className={`h-full w-full ${isPanning ? 'cursor-grabbing' : 'cursor-grab'}`}
-        onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -309,7 +380,7 @@ export function WorldMap({ visitedCountries, onCountryClick }: WorldMapProps) {
       </div>
 
       <div className="absolute bottom-4 left-4 rounded-lg bg-card/90 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur-sm">
-        Scroll to zoom, drag to pan
+        <span className="hidden sm:inline">Scroll to zoom · </span>Drag to pan<span className="sm:hidden"> · Pinch to zoom</span>
       </div>
     </div>
   )

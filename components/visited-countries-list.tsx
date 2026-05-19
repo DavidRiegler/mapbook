@@ -31,7 +31,7 @@ export function VisitedCountriesList({
   const uniqueCountriesCount = new Set(memories.map(m => m.countryCode)).size
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-full flex-col gap-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Visited Countries
@@ -52,7 +52,7 @@ export function VisitedCountriesList({
           </div>
         </div>
       ) : (
-        <ScrollArea className="h-[calc(100vh-320px)]">
+        <ScrollArea className="flex-1 min-h-0">
           <div className="flex flex-col gap-2 pr-4">
             {visitedCountries.map((item) => (
               <div

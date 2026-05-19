@@ -32,13 +32,13 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
 
   return (
     <>
-      <header className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
+      <header className="flex items-center justify-between border-b border-border bg-card px-3 py-3 sm:px-6">
         {/* Logo */}
         <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
             <Globe className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-lg font-semibold text-foreground">Mapbook</span>
+          <span className="hidden text-lg font-semibold text-foreground sm:inline">Mapbook</span>
         </div>
 
         {/* Tabs */}
@@ -48,7 +48,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               className={`
-                relative flex items-center gap-2 px-5 py-2 text-sm font-medium transition-all
+                relative flex items-center gap-2 px-2 py-2 text-sm font-medium transition-all sm:px-5
                 ${activeTab === tab.id
                   ? 'rounded-t-lg bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
@@ -60,7 +60,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
               }}
             >
               {tab.icon}
-              {tab.label}
+              <span className="hidden sm:inline">{tab.label}</span>
             </button>
           ))}
         </nav>
